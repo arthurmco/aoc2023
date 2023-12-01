@@ -28,7 +28,7 @@ fn try_convert_into_number(line_piece: &str) -> Option<(String, usize)> {
     //
     // The objective is to parse 'eightwothree' as 8wo3 and not eigh23.
     //  
-    let numberset: Vec<(usize, &'static str)> = [
+    [
         (3, "three"),
         (7, "seven"),
         (8, "eight"),
@@ -38,15 +38,9 @@ fn try_convert_into_number(line_piece: &str) -> Option<(String, usize)> {
         (1, "one"),
         (2, "two"),
         (6, "six"),
-    ].to_vec();
-
-    for (num, name) in numberset {
-        if line_piece.starts_with(name) {
-            return Some((num.to_string(), name.len()))
-        }
-    }
-
-    None
+    ].into_iter().find(
+        |(_num, name)| line_piece.starts_with(name)
+    ).map(|(num, name)| (num.to_string(), name.len()))
 }
 
 fn transform_line(line: &str) -> String {
@@ -78,7 +72,8 @@ fn fix_incorrect_line2(line: &str) -> u64 {
     let tline = transform_line(line);
     let first = tline.chars().find(|c| c.is_digit(10)).unwrap();
     let last = tline.chars().rfind(|c| c.is_digit(10)).unwrap();
-    println!("{} {} {}{}", line, tline, first, last);
+
+    println!("{}{}", first, last);
     
     format!("{}{}", first, last).parse::<u64>().unwrap()
 }
