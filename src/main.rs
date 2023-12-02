@@ -1,7 +1,9 @@
 mod day1;
+mod day2;
 pub mod util;
 
 use day1::day1;
+use day2::day2;
 
 
 fn main() {
@@ -9,6 +11,7 @@ fn main() {
 
     match day.as_str() {
         "day1" => day1(),
+        "day2" => day2(),
         _ => panic!("Day not found!")
     }   
 }
