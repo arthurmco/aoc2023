@@ -1,5 +1,6 @@
 use crate::util::read_file_as_text;
 use regex::Regex;
+use std::cmp;
 use std::default::Default;
 use std::io::prelude::*;
 use std::ops::Add;
@@ -30,6 +31,12 @@ impl Add for CubeSet {
             greens: self.greens + rhs.greens,
             reds: self.reds + rhs.reds,
         }
+    }
+}
+
+impl CubeSet {
+    pub fn power(&self) -> usize {
+        self.blues * self.greens * self.reds
     }
 }
 
@@ -86,25 +93,55 @@ fn parse_line(line: &str) -> Game {
     (game_id, game_sets)
 }
 
-pub fn day2() {
-    //let game_file = read_file_as_text("./inputs/day2test1.txt"); 
+pub fn day2t1() {
+    //let game_file = read_file_as_text("./inputs/day2test1.txt");
     let game_file = read_file_as_text("./inputs/day2real.txt");
-    
+
     let parsed_game = game_file
         .lines()
         .into_iter()
         .map(|v| parse_line(&v.unwrap()))
-        .inspect(|e| eprintln!("{:?}", e));    
+        .inspect(|e| eprintln!("{:?}", e));
     let id_sum: usize = parsed_game
         .filter(|(_game, sets)| {
-            let is_every_round_possible = sets.iter().all(
-                |set| set.reds <= 12 && set.greens <= 13 && set.blues <= 14
-            );
+            let is_every_round_possible = sets
+                .iter()
+                .all(|set| set.reds <= 12 && set.greens <= 13 && set.blues <= 14);
             println!("{:?}", is_every_round_possible);
             is_every_round_possible
         })
         .map(|(game, _sets)| game)
         .inspect(|e| eprintln!("<<{}>> ", e))
+        .sum();
+
+    println!("\n\n{}", id_sum);
+}
+
+pub fn day2() {
+    //let game_file = read_file_as_text("./inputs/day2test1.txt");
+    let game_file = read_file_as_text("./inputs/day2real.txt");
+
+    let parsed_game = game_file
+        .lines()
+        .into_iter()
+        .map(|v| parse_line(&v.unwrap()))
+        .inspect(|e| eprintln!("{:?}", e));
+    let id_sum: usize = parsed_game
+        .map(|(_game, sets)| {
+            let minimum_set = sets
+                .iter()
+                .cloned()
+                .reduce(|acc, round| CubeSet {
+                    blues: cmp::max(acc.blues, round.blues),
+                    greens: cmp::max(acc.greens, round.greens),
+                    reds: cmp::max(acc.reds, round.reds),
+                })
+                .unwrap();
+
+            let power = minimum_set.power();
+            eprintln!("{:?} {}", minimum_set, power);
+            power
+        })
         .sum();
 
     println!("\n\n{}", id_sum);
