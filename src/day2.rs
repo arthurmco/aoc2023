@@ -3,7 +3,6 @@ use regex::Regex;
 use std::cmp;
 use std::default::Default;
 use std::io::prelude::*;
-use std::ops::Add;
 
 #[derive(Debug, Clone)]
 struct CubeSet {
@@ -18,18 +17,6 @@ impl Default for CubeSet {
             blues: 0,
             greens: 0,
             reds: 0,
-        }
-    }
-}
-
-impl Add for CubeSet {
-    type Output = CubeSet;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        CubeSet {
-            blues: self.blues + rhs.blues,
-            greens: self.greens + rhs.greens,
-            reds: self.reds + rhs.reds,
         }
     }
 }
@@ -93,7 +80,7 @@ fn parse_line(line: &str) -> Game {
     (game_id, game_sets)
 }
 
-pub fn day2t1() {
+pub fn _day2t1() {
     //let game_file = read_file_as_text("./inputs/day2test1.txt");
     let game_file = read_file_as_text("./inputs/day2real.txt");
 
@@ -124,8 +111,8 @@ pub fn day2() {
     let parsed_game = game_file
         .lines()
         .into_iter()
-        .map(|v| parse_line(&v.unwrap()))
-        .inspect(|e| eprintln!("{:?}", e));
+        .map(|v| parse_line(&v.unwrap()));
+//        .inspect(|e| eprintln!("{:?}", e));
     let id_sum: usize = parsed_game
         .map(|(_game, sets)| {
             let minimum_set = sets
@@ -139,7 +126,7 @@ pub fn day2() {
                 .unwrap();
 
             let power = minimum_set.power();
-            eprintln!("{:?} {}", minimum_set, power);
+            //eprintln!("{:?} {}", minimum_set, power);
             power
         })
         .sum();
