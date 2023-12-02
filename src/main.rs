@@ -1,4 +1,5 @@
 mod day1;
+pub mod util;
 
 use day1::day1;
 
