@@ -37,7 +37,7 @@ fn parse_game(line: &str) -> GameID {
     game_number.parse::<GameID>().unwrap()
 }
 
-fn parse_each_round(line: &str) -> CubeSet {
+fn parse_each_set(line: &str) -> CubeSet {
     // 3 X, 4 Y
     let regex = Regex::new(r"(?m)\s*(\d*)\s*([a-z]*)").unwrap();
 
@@ -66,16 +66,16 @@ fn parse_each_round(line: &str) -> CubeSet {
         })
 }
 
-fn parse_sets(line: &str) -> Vec<CubeSet> {
+fn parse_round(line: &str) -> Vec<CubeSet> {
     // 3 X, 4 Y; 1 X, 2 Y...
-    line.split(";").into_iter().map(parse_each_round).collect()
+    line.split(";").into_iter().map(parse_each_set).collect()
 }
 
 fn parse_line(line: &str) -> Game {
     let mut game_split = line.split(":");
 
     let game_id = parse_game(game_split.next().unwrap());
-    let game_sets = parse_sets(game_split.next().unwrap());
+    let game_sets = parse_round(game_split.next().unwrap());
 
     (game_id, game_sets)
 }
@@ -112,7 +112,6 @@ pub fn day2() {
         .lines()
         .into_iter()
         .map(|v| parse_line(&v.unwrap()));
-//        .inspect(|e| eprintln!("{:?}", e));
     let id_sum: usize = parsed_game
         .map(|(_game, sets)| {
             let minimum_set = sets
@@ -126,7 +125,7 @@ pub fn day2() {
                 .unwrap();
 
             let power = minimum_set.power();
-            //eprintln!("{:?} {}", minimum_set, power);
+            eprintln!("{:?} {}", minimum_set, power);
             power
         })
         .sum();
