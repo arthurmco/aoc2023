@@ -1,4 +1,4 @@
-use crate::util::read_file_as_text;
+use crate::util::{read_file_as_text, generate_adjacencies};
 use regex::Regex;
 use std::io::prelude::*;
 
@@ -10,6 +10,7 @@ struct Schematic {
 type SchematicNumber = (usize, usize, usize, u32);
 type GearPosition = (usize, usize);
 
+#[allow(dead_code)]
 impl Schematic {
     fn from_line_iter<S: Iterator<Item = String>>(iter: S) -> Schematic {
         Schematic {
@@ -56,28 +57,7 @@ impl Schematic {
     }
 
     fn generate_adjacencies(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
-        let ix = x as isize;
-        let iy = y as isize;
-
-        [
-            (iy - 1, ix - 1),
-            (iy - 1, ix),
-            (iy - 1, ix + 1),
-            (iy, ix - 1),
-            (iy, ix + 1),
-            (iy + 1, ix - 1),
-            (iy + 1, ix),
-            (iy + 1, ix + 1),
-        ]
-        .into_iter()
-        .filter(|&(ay, ax)| {
-            ay >= 0
-                && ax >= 0
-                && ay < (self.data.len() as isize)
-                && ax < (self.data[0].len() as isize)
-        })
-        .map(|(ay, ax)| (ay as usize, ax as usize))
-        .collect()
+        generate_adjacencies(&self.data, x, y)
     }
 
     fn is_adjacent_to_symbol(&self, x: usize, y: usize) -> bool {
@@ -143,7 +123,7 @@ impl Schematic {
     }
 }
 
-pub fn day3t1() {
+pub fn _day3t1() {
     let game_file = read_file_as_text("./inputs/day3real.txt");
     //let game_file = read_file_as_text("./inputs/day3test.txt");
 
@@ -175,9 +155,9 @@ pub fn day3() {
 
     let numbers = schematic.retrieve_numbers_and_positions();
     let gears = schematic.retrieve_possible_gears_position();
-    println!("Hello, {:?}", gears);
+    //println!("Hello, {:?}", gears);
     let gears = schematic.retrieve_part_numbers_for_all_gears(gears, numbers);
-    println!("Hello, {:?}", gears);
+    //println!("Hello, {:?}", gears);
 
     let sum = schematic.retrieve_gear_ratio_sum(gears);
     println!("{}", sum);
