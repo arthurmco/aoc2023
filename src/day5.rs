@@ -1,4 +1,4 @@
-use crate::util::read_file_as_text;
+use crate::util::{read_file_as_text, split_numbers_by_space};
 use std::io::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -31,13 +31,6 @@ impl AlmanacRange {
             })
             .unwrap_or(source)
     }
-}
-
-pub fn split_numbers_by_space(val: &str) -> Vec<usize> {
-    val.trim()
-        .split(' ')
-        .map(|s| s.parse::<usize>().unwrap())
-        .collect()
 }
 
 #[derive(Debug)]

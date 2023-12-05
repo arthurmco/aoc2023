@@ -32,3 +32,10 @@ pub fn generate_adjacencies<T, T2: Deref<Target = [T]>>(
     .map(|(ay, ax)| (ay as usize, ax as usize))
     .collect()
 }
+
+pub fn split_numbers_by_space(val: &str) -> Vec<usize> {
+    val.trim()
+        .split(' ')
+        .map(|s| s.parse::<usize>().unwrap())
+        .collect()
+}
