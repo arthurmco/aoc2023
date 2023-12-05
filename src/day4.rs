@@ -1,3 +1,5 @@
+#[allow(dead_code)]
+
 use crate::util::{read_file_as_text};
 use std::io::prelude::*;
 use std::collections::HashMap;
