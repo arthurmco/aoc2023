@@ -1,6 +1,8 @@
 use crate::util::{read_file_as_text, split_numbers_by_space};
 use std::io::prelude::*;
 
+type SeedRange = (usize, usize);
+
 #[derive(Debug, Clone)]
 struct AlmanacRange {
     destination_start: usize,
@@ -31,11 +33,83 @@ impl AlmanacRange {
             })
             .unwrap_or(source)
     }
+
+    fn correspondence_ranges(ranges: &[AlmanacRange], source: SeedRange) -> Vec<SeedRange> {
+        let mut ranges_in_source: Vec<&AlmanacRange> = ranges
+            .iter()
+            .filter(|r| {
+                let (sstart, slen) = source;
+                let range_end = r.source_start + r.range_length;
+
+                (r.source_start.saturating_sub(r.range_length)) <= sstart && (sstart + slen) <= (range_end)
+            })
+            .collect();
+
+        if ranges_in_source.len() == 0 {
+            vec![source]
+        } else {
+            ranges_in_source.sort_by(|a, b| a.source_start.cmp(&b.source_start));
+            //println!("\n\n\n\n\n\n\nris {:?} {:?}", ranges_in_source, source);
+            
+            let mut ret = vec![];
+            let mut current = source.0;
+            let end = current + source.1;
+
+            eprintln!("-");
+            for range in ranges_in_source {
+                if current < range.source_start {
+                    let len = (range.source_start - current).min(end-current);
+                    ret.push((current, len));
+                    current += len;
+                }                
+
+                if current >= end {
+                    //eprintln!("{} ret {:?}", current, ret);
+                    break;
+                }                         
+
+                let from_start = range.source_start;
+                let to_start = range.destination_start;
+                let from_end = range.source_start + range.range_length;
+                let offset = current - range.source_start;
+                let real_start = from_start + offset;               
+
+                //eprintln!("{} - {}", end, current);
+                let remaining_len = end - current;
+
+                let length = (remaining_len).min(from_end - real_start);
+                //println!("{} = min({}, {} - {}) {}", length, remaining_len,
+                //from_end, real_start, from_end-real_start);
+                
+                //                println!("fe {} {:?} {}, {}, {}", length, ((to_start+offset, length)), end, current,
+                //         end.saturating_sub(current));
+
+                
+                //eprintln!("r {:?}", range);
+                ret.push((to_start + offset, length));
+                //eprintln!("{} ret {:?}", current, ret);
+
+                current += length;
+
+                if current >= end {
+                    break;
+                }                               
+            }
+            
+            assert!(current <= end);
+            if current < end {
+                ret.push((current, end - current));
+            } 
+            
+            ret
+        }
+    }
 }
 
 #[derive(Debug)]
 struct SeedFile {
-    initial_seeds: Vec<usize>,
+    initial_seeds: Vec<SeedRange>,
+    //initial_seeds: Vec<usize>, p1
     seed_to_soil: Vec<AlmanacRange>,
     soil_to_fertilizer: Vec<AlmanacRange>,
     fertilizer_to_water: Vec<AlmanacRange>,
@@ -57,7 +131,11 @@ enum SeedFileParseState {
 }
 
 impl SeedFile {
-    fn initial_seeds(&self) -> &[usize] {
+    /* fn initial_seeds(&self) -> &[usize] {
+        &self.initial_seeds
+    } */
+
+    fn initial_seeds(&self) -> &[(usize, usize)] {
         &self.initial_seeds
     }
 
@@ -73,6 +151,47 @@ impl SeedFile {
         eprintln!(
             "soil {} fert {} water {} light {} temp {} humidity {}",
             soil, fertilizer, water, light, temperature, humidity
+        );
+
+        location
+    }
+
+    fn seed_to_location_ranges(&self, seed: SeedRange) -> Vec<SeedRange> {
+        let soil = AlmanacRange::correspondence_ranges(&self.seed_to_soil, seed);
+        let fertilizer: Vec<SeedRange> = soil
+            .iter()
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.soil_to_fertilizer, s.clone()))
+            .collect();
+        let water: Vec<SeedRange> = fertilizer
+            .iter()
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.fertilizer_to_water, s.clone()))
+            .collect();
+        let light: Vec<SeedRange> = water
+            .iter()
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.water_to_light, s.clone()))
+            .collect();
+        let temperature: Vec<SeedRange> = light
+            .iter()
+            .flat_map(|s| {
+                AlmanacRange::correspondence_ranges(&self.light_to_temperature, s.clone())
+            })
+            .collect();
+        let humidity: Vec<SeedRange> = temperature
+            .iter()
+            .flat_map(|s| {
+                AlmanacRange::correspondence_ranges(&self.temperature_to_humidity, s.clone())
+            })
+            .collect();
+        let location: Vec<SeedRange> = humidity
+            .iter()
+            .flat_map(|s| {
+                AlmanacRange::correspondence_ranges(&self.humidity_to_location, s.clone())
+            })
+            .collect();
+
+        eprintln!(
+            "\tseed: {:?}\n\tsoil {:?} \n\tfert {:?} \n\twater {:?} \n\tlight {:?} \n\ttemp {:?} \n\thumidity {:?}\n\tlocation: {:?}",
+            seed, soil, fertilizer, water, light, temperature, humidity, location
         );
 
         location
@@ -116,9 +235,17 @@ impl SeedFile {
         }
     }
 
+    fn split_initial_seeds(line: &str) -> Vec<(usize, usize)> {
+        split_numbers_by_space(&line)
+            .chunks(2)
+            .map(|v| (v[0], v[1]))
+            .collect()
+    }
+
     fn from_lines(mut lines: impl Iterator<Item = String>) -> SeedFile {
         let seed_line = lines.next().unwrap();
-        let initial_seeds = split_numbers_by_space(&seed_line[6..]);
+        let initial_seeds = SeedFile::split_initial_seeds(&seed_line[6..]);
+        //let initial_seeds = split_numbers_by_space(&seed_line[6..]);
 
         let mut initial_seed = SeedFile {
             initial_seeds,
@@ -175,9 +302,10 @@ impl SeedFile {
     }
 }
 
+/*
 pub fn day5() {
-    let game_file = read_file_as_text("./inputs/day5real.txt").lines();
-    //let game_file = read_file_as_text("./inputs/day5test.txt").lines();
+    //let game_file = read_file_as_text("./inputs/day5real.txt").lines();
+    let game_file = read_file_as_text("./inputs/day5test.txt").lines();
     let seed_file = SeedFile::from_lines(game_file.map(|l| l.unwrap()));
 
     //let ranges = vec![AlmanacRange::from_line("50 98 2"), AlmanacRange::from_line("52 50 48")];
@@ -191,5 +319,27 @@ pub fn day5() {
         .min()
         .unwrap();
 
-    println!("\n{}", min_location);
+println!("\n{}", min_location);
+}
+ */
+// 198106515: too high
+
+pub fn day5() {
+    //let game_file = read_file_as_text("./inputs/day5real.txt").lines();
+    let game_file = read_file_as_text("./inputs/day5test.txt").lines();
+    let seed_file = SeedFile::from_lines(game_file.map(|l| l.unwrap()));
+    
+    //let ranges = vec![AlmanacRange::from_line("50 98 2"), AlmanacRange::from_line("52 50 48")];
+    println!("Hello {:?} ", seed_file);
+    let locations = seed_file
+        .initial_seeds() // &[(3082872446, 316680412)]
+        .iter()
+        .flat_map(|s| seed_file.seed_to_location_ranges(*s))
+        //.inspect(|s| eprintln!("ranges {:?}", s))
+        .map(|(rs, _)| rs)
+        .min()
+        .unwrap();
+
+    println!("\n{}", locations)
+
 }
