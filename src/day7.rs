@@ -7,8 +7,7 @@ enum Card {
     A = 14,
     K = 13,
     Q = 12,
-    J = 11,
-    T = 10,
+    T = 11,
     C9 = 9,
     C8 = 8,
     C7 = 7,
@@ -17,6 +16,7 @@ enum Card {
     C4 = 4,
     C3 = 3,
     C2 = 2,
+    J = 1,
 }
 
 impl TryFrom<char> for Card {
@@ -37,11 +37,10 @@ impl TryFrom<char> for Card {
             '7' => Ok(Card::C7),
             '8' => Ok(Card::C8),
             '9' => Ok(Card::C9),
-            _ => Err(format!("Invalid char for card: {}", value))
+            _ => Err(format!("Invalid char for card: {}", value)),
         }
     }
 }
-
 
 type CardHand = (Card, Card, Card, Card, Card);
 
@@ -83,8 +82,37 @@ fn get_card_occurences_in_hand(hand: &CardHand) -> Vec<(usize, Card)> {
     })
 }
 
+fn fix_joker(mut occurences: Vec<(usize, Card)>) -> Vec<(usize, Card)> {
+    // make counts attributed to the joker go to whatever card has the biggest occurence;
+
+    let joker_data = occurences.iter().find(|(_, c)| *c == Card::J);
+
+    match joker_data {
+        None => occurences,
+        Some((freq, _)) => {
+            if occurences.len() == 1 {
+                occurences
+            } else {
+                let biggest = occurences
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, (_, c))| *c != Card::J)
+                    .max_by(|(_, (count_a, _)), (_, (count_b, _))| count_a.cmp(count_b))
+                    .unwrap();
+
+                let (b_index, (b_count, b_card)) = biggest;
+                occurences[b_index] = (b_count + freq, *b_card);
+                occurences
+                    .into_iter()
+                    .filter(|(_, c)| *c != Card::J)
+                    .collect()
+            }
+        }
+    }
+}
+
 fn get_hand_type(hand: &CardHand) -> HandType {
-    let occurences = get_card_occurences_in_hand(hand);
+    let occurences = fix_joker(get_card_occurences_in_hand(hand));
 
     assert!(occurences.len() <= 5);
 
@@ -129,8 +157,13 @@ type CardLine = (CardHand, usize);
 fn line_to_hand(line: &str) -> CardHand {
     let mut chariter = line.chars().take(5).filter_map(|c| Card::try_from(c).ok());
 
-    (chariter.next().unwrap(), chariter.next().unwrap(), chariter.next().unwrap(),
-    chariter.next().unwrap(), chariter.next().unwrap())
+    (
+        chariter.next().unwrap(),
+        chariter.next().unwrap(),
+        chariter.next().unwrap(),
+        chariter.next().unwrap(),
+        chariter.next().unwrap(),
+    )
 }
 
 fn line_to_cardline(line: &str) -> CardLine {
@@ -138,11 +171,9 @@ fn line_to_cardline(line: &str) -> CardLine {
 
     (
         line_to_hand(parts.next().unwrap()),
-        parts.next().unwrap().trim().parse::<usize>().unwrap()
+        parts.next().unwrap().trim().parse::<usize>().unwrap(),
     )
-    
 }
-
 
 pub fn day7() {
     let game_file = read_file_as_text("./inputs/day7real.txt").lines();
@@ -154,8 +185,12 @@ pub fn day7() {
     hand_bids.sort_by(|(a, _), (b, _)| order_card_hand(a, b));
     println!("{:?}", hand_bids);
 
-    let winnings: usize = hand_bids.iter().enumerate().map(|(index, (_, bid))| (index+1) * bid).sum();;
-    //println!("{:?}", winnings.collect::<Vec<usize>>());    
+    let winnings: usize = hand_bids
+        .iter()
+        .enumerate()
+        .map(|(index, (_, bid))| (index + 1) * bid)
+        .sum();
+    //println!("{:?}", winnings.collect::<Vec<usize>>());
 
     println!("\n{}", winnings)
 }
