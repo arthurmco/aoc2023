@@ -1,3 +1,4 @@
+#[allow(dead_code, unused_mut)]
 
 use crate::util::{read_file_as_text, split_numbers_by_space};
 use std::io::prelude::*;
