@@ -2,6 +2,7 @@ use crate::util::{read_file_as_text};
 use std::io::prelude::*;
 use std::collections::HashMap;
 use regex::Regex;
+use std::iter::FusedIterator;
 
 #[derive(Debug, Clone, Copy)]
 enum Direction {
@@ -29,8 +30,6 @@ type MapPoint = (MapNode, MapNode);
 #[derive(Debug)]
 struct Map {
     directions: Vec<Direction>,
-    current_direction_index: usize,
-    current_node: MapNode,
     nodes: HashMap<MapNode, MapPoint>
 }
 
@@ -67,32 +66,49 @@ impl Map {
 
         Map {
             directions,
-            current_direction_index: 0,
-            current_node: String::from("AAA"),
             nodes
         }
     }
 
-    fn reset(&mut self) {
-        self.current_node = String::from("AAA");
-        self.current_direction_index = 0;
+    fn simple_iter(&self) -> SimpleMapIter {
+        SimpleMapIter::new(self)
     }
+}
 
+struct SimpleMapIter<'a> {
+    map: &'a Map,
+    current_direction_index: usize,
+    current_node: MapNode,
+}
+
+impl<'a> SimpleMapIter<'a> {
+    fn new(map: &'a Map) -> Self {
+        SimpleMapIter {
+            map,
+            current_direction_index: 0,
+            current_node: String::from("AAA")
+        }
+    }
+    
     fn increase_direction(&self) -> usize {
         let result = self.current_direction_index + 1;
-        if result >= self.directions.len() {
+        if result >= self.map.directions.len() {
             0
         } else {
             result
         }
     }
-    
-    fn iterate_node(&mut self) -> Option<MapIterResult> {
+}
+
+impl<'a> Iterator for SimpleMapIter<'a> {
+    type Item = MapIterResult;
+
+    fn next(&mut self) -> Option<Self::Item> {
         if self.current_node == "ZZZ" {
             None
         } else {
-            let direction = self.directions[self.current_direction_index];            
-            let (path_left, path_right) = self.nodes.get(&self.current_node).unwrap();
+            let direction = self.map.directions[self.current_direction_index];            
+            let (path_left, path_right) = self.map.nodes.get(&self.current_node).unwrap();
             let next_node = match direction {
                 Direction::Left => path_left,
                 Direction::Right => path_right
@@ -105,18 +121,14 @@ impl Map {
     }
 }
 
+impl<'a> FusedIterator for SimpleMapIter<'a> { }
 
 pub fn day8() {
     let game_file = read_file_as_text("./inputs/day8real.txt").lines();    
-    let mut map = Map::new(game_file.map(|s| s.unwrap()));
+    let map = Map::new(game_file.map(|s| s.unwrap()));
     
     println!("Hello, {:?}", map);
 
-    let mut nums = 0;
-    while let Some((node, dir)) = map.iterate_node() {
-        println!("{} {:?}", node, dir);
-        nums += 1;
-    }
-
+    let nums = map.simple_iter().inspect(|(node, dir)| println!("{} {:?}", node, dir)).count();
     println!("\n{}", nums);
 }
