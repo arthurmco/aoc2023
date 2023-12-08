@@ -1,4 +1,4 @@
-#[allow(dead_code)]
+#![allow(dead_code, unused_variables)]
 
 use crate::util::{read_file_as_text};
 use std::io::prelude::*;

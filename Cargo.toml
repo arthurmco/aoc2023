@@ -6,5 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+console_engine = "2.6.0"
 num = "0.4.1"
 regex = "1.10.2"

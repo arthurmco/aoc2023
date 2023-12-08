@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_mut, unused_variables)]
+
 use crate::util::{read_file_as_text};
 use std::io::prelude::*;
 use std::collections::HashMap;
@@ -211,7 +213,7 @@ fn faster_ghost_map_count(map: &Map) -> usize {
 }
 
 
-pub fn day8t1() {
+pub fn day8() {
     let game_file = read_file_as_text("./inputs/day8real.txt").lines();    
     let map = Map::new(game_file.map(|s| s.unwrap()));
     
@@ -221,8 +223,125 @@ pub fn day8t1() {
     println!("\n{}", nums);
 }
 
+use console_engine::screen::Screen;
+use console_engine::Color;
+use console_engine::pixel;
+use std::{thread, time};
 
-pub fn day8() {
+fn get_x1_coord_to_center(width: usize, value: &str) -> usize {
+    (width/2) - (value.chars().count()/2)
+}
+
+fn get_x2_coord_to_center(width: usize, value: &str) -> usize {
+    (width/2) + (value.chars().count()/2)
+}
+
+fn draw_screens(graph: &Screen, icon: &Screen, dirs: &Screen, engine: &mut console_engine::ConsoleEngine) {
+    engine.rect(50, 0, 50, 18, pixel::pxl('|'));
+
+    engine.print_screen(0, 0, &graph);
+    engine.print_screen(53, 2, &icon);
+    engine.print_screen(0, 19, &dirs);
+    engine.draw();
+
+    engine.wait_frame();
+    engine.clear_screen();
+}
+
+fn draw_directions(scr: &mut Screen, mut dirs: impl Iterator<Item=Direction>) {
+    scr.clear();
+    
+    let first = dirs.next().unwrap();
+    let text = format!("  {:?}  ", first);
+    let x1 = get_x1_coord_to_center(13, &text);
+    scr.print_fbg(x1 as i32, 0, &text, Color::Black, Color::White);
+
+    scr.print_fbg(14, 0, "*", Color::White, Color::Reset);
+
+    let mut index = 15;
+
+    for d in dirs {
+        let text = format!("{:?}", d);
+        let x1 = get_x1_coord_to_center(13, &text);
+        scr.print_fbg(index + x1 as i32, 0, &text, Color::White, Color::Reset);
+        
+        scr.print_fbg(index + 14, 0, "*", Color::White, Color::Reset);
+        index += 15
+    }
+}
+
+pub fn day8view() {
+    let game_file = read_file_as_text("./inputs/day8real.txt").lines();    
+    let map = Map::new(game_file.map(|s| s.unwrap()));
+
+    let mut engine = console_engine::ConsoleEngine::init(70, 20, 5).unwrap();
+    engine.wait_frame();
+    engine.clear_screen();
+    
+    let mut graph_str = Screen::new(45,15);
+    let mut icon_str = Screen::new(15,11);
+    let mut dir_str = Screen::new(70,1);
+
+    icon_str.print_fbg(0, 0,
+                       r#"       .-.
+      ( " )
+   /\_.' '._/\
+   |         |
+    \       /
+     \    /`
+   (__)  /
+jgs`.__.'"#, Color::Cyan, Color::Reset);
+    
+    let text = "AAA";
+    let x1pos = get_x1_coord_to_center(graph_str.get_width() as usize, &text);
+    let x2pos = get_x2_coord_to_center(graph_str.get_width() as usize, &text);
+    graph_str.rect((x1pos as i32)-2, 7, (x2pos as i32)+2, 11, pixel::pxl('*'));
+    draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+    graph_str.print_fbg(x1pos as i32, 9, &text, Color::White, Color::Reset);
+        
+    draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+
+    let mut idx = 0;
+    for m in map.simple_iter() {
+        thread::sleep(time::Duration::from_millis(300));
+        draw_directions(&mut dir_str, map.directions.iter().cycle().skip(idx).take(3).cloned());
+        
+        let (node, dir) = m;
+        let direction = match dir {
+            Direction::Left => -1,
+            Direction::Right => 1
+        };      
+        
+        for v in 0..5 {
+            let dir = match v {
+                0..=3 => direction,
+                _ => 0
+            };
+            
+            graph_str.scroll(direction, 1, pixel::pxl(' '));
+            draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+        }
+        
+        let text = format!("{}", node);
+        let x1pos = get_x1_coord_to_center(graph_str.get_width() as usize, &text);
+        let x2pos = get_x2_coord_to_center(graph_str.get_width() as usize, &text);
+        
+        graph_str.rect((x1pos as i32)-2, 7, (x2pos as i32)+2, 11, pixel::pxl('*'));
+        draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+        graph_str.print_fbg(x1pos as i32, 9, &text, Color::White, Color::Reset);
+        draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+
+        thread::sleep(time::Duration::from_millis(300));
+        draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
+        idx += 1;
+    }
+
+    //let nums = map.simple_iter().inspect(|(node, dir)| println!("{} {:?}", node, dir)).count();
+    //println!("\n{}", nums);
+}
+
+
+pub fn day8t2() {
     let game_file = read_file_as_text("./inputs/day8real.txt").lines();
     let map = Map::new(game_file.map(|s| s.unwrap()));
     

@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_mut, unused_variables)]
+
 use crate::util::{read_file_as_text, split_numbers_by_space};
 use std::io::prelude::*;
 
@@ -48,7 +50,8 @@ impl AlmanacRange {
         if ranges_in_source.len() == 0 {
             vec![source]
         } else {
-            ranges_in_source.sort_by(|a, b| a.source_start.cmp(&b.source_start));
+            vec![source]
+            /*ranges_in_source.sort_by(|a, b| a.source_start.cmp(&b.source_start));
             //println!("\n\n\n\n\n\n\nris {:?} {:?}", ranges_in_source, source);
             
             let mut ret = vec![];
@@ -70,7 +73,7 @@ impl AlmanacRange {
 
                 let from_start = range.source_start;
                 let to_start = range.destination_start;
-                let from_end = range.source_start + range.range_length;
+                let from_end = from_start + range.range_length;
                 let offset = current - range.source_start;
                 let real_start = from_start + offset;               
 
@@ -102,7 +105,8 @@ impl AlmanacRange {
             } 
             
             ret
-        }
+          */  
+        } 
     }
 }
 
@@ -148,10 +152,10 @@ impl SeedFile {
         let humidity = AlmanacRange::correspondences(&self.temperature_to_humidity, temperature);
         let location = AlmanacRange::correspondences(&self.humidity_to_location, humidity);
 
-        eprintln!(
+        /* eprintln!(
             "soil {} fert {} water {} light {} temp {} humidity {}",
             soil, fertilizer, water, light, temperature, humidity
-        );
+        ); */
 
         location
     }
@@ -323,10 +327,33 @@ println!("\n{}", min_location);
 }
  */
 // 198106515: too high
+// 26714516: certa
 
+/*
 pub fn day5() {
     //let game_file = read_file_as_text("./inputs/day5real.txt").lines();
-    let game_file = read_file_as_text("./inputs/day5test.txt").lines();
+    let game_file = read_file_as_text("./inputs/day5real.txt").lines();
+    let seed_file = SeedFile::from_lines(game_file.map(|l| l.unwrap()));
+
+    //let ranges = vec![AlmanacRange::from_line("50 98 2"), AlmanacRange::from_line("52 50 48")];
+    //println!("Hello {:?} ", seed_file);
+
+    let min_location = seed_file
+        .initial_seeds()
+        .iter()
+        .flat_map(|&(ss,sl)| ss..(ss+sl))
+        .map(|s| seed_file.seed_to_location(s))
+        //.inspect(|s| eprintln!("seed {}", s))
+        .min()
+        .unwrap();
+
+    println!("\n{}", min_location);
+}
+*/
+
+pub fn day5() {
+    let game_file = read_file_as_text("./inputs/day5real.txt").lines();
+    //let game_file = read_file_as_text("./inputs/day5test.txt").lines();
     let seed_file = SeedFile::from_lines(game_file.map(|l| l.unwrap()));
     
     //let ranges = vec![AlmanacRange::from_line("50 98 2"), AlmanacRange::from_line("52 50 48")];
@@ -343,3 +370,4 @@ pub fn day5() {
     println!("\n{}", locations)
 
 }
+

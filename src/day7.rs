@@ -1,4 +1,6 @@
-use crate::util::{read_file_as_text, split_numbers_by_space};
+#![allow(dead_code, unused_mut, unused_variables)]
+
+use crate::util::{read_file_as_text};
 use std::cmp::{Ordering, PartialOrd};
 use std::io::prelude::*;
 
