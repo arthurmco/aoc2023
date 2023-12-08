@@ -209,7 +209,7 @@ fn faster_ghost_map_count(map: &Map) -> usize {
 
     current_nodes.into_iter().map(|node| {
         map.simple_iter_with_custom_start(&node).count()
-    }).reduce(|n1, n2| lcm(n1, n2)).unwrap()
+    }).reduce(lcm).unwrap()
 }
 
 
@@ -239,9 +239,9 @@ fn get_x2_coord_to_center(width: usize, value: &str) -> usize {
 fn draw_screens(graph: &Screen, icon: &Screen, dirs: &Screen, engine: &mut console_engine::ConsoleEngine) {
     engine.rect(50, 0, 50, 18, pixel::pxl('|'));
 
-    engine.print_screen(0, 0, &graph);
-    engine.print_screen(53, 2, &icon);
-    engine.print_screen(0, 19, &dirs);
+    engine.print_screen(0, 0, graph);
+    engine.print_screen(53, 2, icon);
+    engine.print_screen(0, 19, dirs);
     engine.draw();
 
     engine.wait_frame();
@@ -293,11 +293,11 @@ pub fn day8view() {
 jgs`.__.'"#, Color::Cyan, Color::Reset);
     
     let text = "AAA";
-    let x1pos = get_x1_coord_to_center(graph_str.get_width() as usize, &text);
-    let x2pos = get_x2_coord_to_center(graph_str.get_width() as usize, &text);
+    let x1pos = get_x1_coord_to_center(graph_str.get_width() as usize, text);
+    let x2pos = get_x2_coord_to_center(graph_str.get_width() as usize, text);
     graph_str.rect((x1pos as i32)-2, 7, (x2pos as i32)+2, 11, pixel::pxl('*'));
     draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
-    graph_str.print_fbg(x1pos as i32, 9, &text, Color::White, Color::Reset);
+    graph_str.print_fbg(x1pos as i32, 9, text, Color::White, Color::Reset);
         
     draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
 
@@ -322,7 +322,7 @@ jgs`.__.'"#, Color::Cyan, Color::Reset);
             draw_screens(&graph_str, &icon_str, &dir_str, &mut engine);
         }
         
-        let text = format!("{}", node);
+        let text = node.to_string();
         let x1pos = get_x1_coord_to_center(graph_str.get_width() as usize, &text);
         let x2pos = get_x2_coord_to_center(graph_str.get_width() as usize, &text);
         

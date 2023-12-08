@@ -53,7 +53,7 @@ impl Schematic {
     }
 
     fn is_symbol(value: char) -> bool {
-        !value.is_digit(10) && value != '.'
+        !value.is_ascii_digit() && value != '.'
     }
 
     fn generate_adjacencies(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
@@ -61,10 +61,10 @@ impl Schematic {
     }
 
     fn is_adjacent_to_symbol(&self, x: usize, y: usize) -> bool {
-        Schematic::generate_adjacencies(&self, x, y)
+        Schematic::generate_adjacencies(self, x, y)
             .into_iter()
             .any(|(ay, ax)| {
-                let c = self.data[ay as usize][ax as usize];
+                let c = self.data[ay][ax];
                 Schematic::is_symbol(c)
             })
     }
@@ -86,7 +86,7 @@ impl Schematic {
         let (gy, gx) = gear;
         nums.iter()
             .filter(|&&(lineno, xstart, xend, _)| {
-                Schematic::generate_adjacencies(&self, gx, gy)
+                Schematic::generate_adjacencies(self, gx, gy)
                     .into_iter()
                     .any(|(ay, ax)| lineno == ay && xstart <= ax && ax < xend)
             })
@@ -128,7 +128,7 @@ pub fn _day3t1() {
     //let game_file = read_file_as_text("./inputs/day3test.txt");
 
     let schematic =
-        Schematic::from_line_iter(game_file.lines().filter(|s| s.is_ok()).map(|s| s.unwrap()));
+        Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
 
     let numbers = schematic.retrieve_numbers_and_positions();
     //println!("Hello, {:?}", schematic);
@@ -151,7 +151,7 @@ pub fn day3() {
     //let game_file = read_file_as_text("./inputs/day3test.txt");
 
     let schematic =
-        Schematic::from_line_iter(game_file.lines().filter(|s| s.is_ok()).map(|s| s.unwrap()));
+        Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
 
     let numbers = schematic.retrieve_numbers_and_positions();
     let gears = schematic.retrieve_possible_gears_position();

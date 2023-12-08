@@ -4,8 +4,8 @@ use crate::util::read_file_as_text;
 use std::io::prelude::*;
 
 fn _fix_incorrect_line(line: &str) -> u64 {
-    let first = line.chars().find(|c| c.is_digit(10)).unwrap();
-    let last = line.chars().rfind(|c| c.is_digit(10)).unwrap();
+    let first = line.chars().find(|c| c.is_ascii_digit()).unwrap();
+    let last = line.chars().rfind(|c| c.is_ascii_digit()).unwrap();
 
     format!("{}{}", first, last).parse::<u64>().unwrap()
 }
@@ -64,8 +64,8 @@ fn transform_line(line: &str) -> String {
 
 fn fix_incorrect_line2(line: &str) -> u64 {
     let tline = transform_line(line);
-    let first = tline.chars().find(|c| c.is_digit(10)).unwrap();
-    let last = tline.chars().rfind(|c| c.is_digit(10)).unwrap();
+    let first = tline.chars().find(|c| c.is_ascii_digit()).unwrap();
+    let last = tline.chars().rfind(|c| c.is_ascii_digit()).unwrap();
 
     // println!("{}{}", first, last);
     

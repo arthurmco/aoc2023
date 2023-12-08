@@ -5,21 +5,14 @@ use std::default::Default;
 use std::io::prelude::*;
 
 #[derive(Debug, Clone)]
+#[derive(Default)]
 struct CubeSet {
     pub blues: usize,
     pub greens: usize,
     pub reds: usize,
 }
 
-impl Default for CubeSet {
-    fn default() -> Self {
-        CubeSet {
-            blues: 0,
-            greens: 0,
-            reds: 0,
-        }
-    }
-}
+
 
 impl CubeSet {
     pub fn power(&self) -> usize {
@@ -41,8 +34,7 @@ fn parse_each_set(line: &str) -> CubeSet {
     // 3 X, 4 Y
     let regex = Regex::new(r"(?m)\s*(\d*)\s*([a-z]*)").unwrap();
 
-    line.split(",")
-        .into_iter()
+    line.split(',')
         .fold(CubeSet::default(), |acc, cube_line| {
             let caps = regex.captures(cube_line).unwrap();
             let count = caps.get(1).unwrap().as_str().parse::<usize>().unwrap();
@@ -68,11 +60,11 @@ fn parse_each_set(line: &str) -> CubeSet {
 
 fn parse_round(line: &str) -> Vec<CubeSet> {
     // 3 X, 4 Y; 1 X, 2 Y...
-    line.split(";").into_iter().map(parse_each_set).collect()
+    line.split(';').map(parse_each_set).collect()
 }
 
 fn parse_line(line: &str) -> Game {
-    let mut game_split = line.split(":");
+    let mut game_split = line.split(':');
 
     let game_id = parse_game(game_split.next().unwrap());
     let game_sets = parse_round(game_split.next().unwrap());
@@ -86,7 +78,6 @@ pub fn _day2t1() {
 
     let parsed_game = game_file
         .lines()
-        .into_iter()
         .map(|v| parse_line(&v.unwrap()))
         .inspect(|e| eprintln!("{:?}", e));
     let id_sum: usize = parsed_game
@@ -110,7 +101,6 @@ pub fn day2() {
 
     let parsed_game = game_file
         .lines()
-        .into_iter()
         .map(|v| parse_line(&v.unwrap()));
     let id_sum: usize = parsed_game
         .map(|(_game, sets)| {

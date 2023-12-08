@@ -149,7 +149,7 @@ fn get_hand_type(hand: &CardHand) -> HandType {
 
 fn order_card_hand(left: &CardHand, right: &CardHand) -> Ordering {
     match get_hand_type(left).cmp(&get_hand_type(right)) {
-        Ordering::Equal => left.cmp(&right),
+        Ordering::Equal => left.cmp(right),
         x => x,
     }
 }

@@ -16,8 +16,8 @@ fn parse_races(time_line: &str, distance_line: &str) -> Vec<Race> {
 }
 
 fn parse_races2(time_line: &str, distance_line: &str) -> Vec<Race> {
-    let times = split_numbers_by_space(&time_line[9..].replace(" ", "")).into_iter();
-    let distances = split_numbers_by_space(&distance_line[9..].replace(" ", "")).into_iter();
+    let times = split_numbers_by_space(&time_line[9..].replace(' ', "")).into_iter();
+    let distances = split_numbers_by_space(&distance_line[9..].replace(' ', "")).into_iter();
     
     times.zip(distances).map(|(t, d)| (t, d)).collect()
 }
@@ -26,8 +26,8 @@ fn distance_for_button_held(race_time: Milisecond, button_held_for_ms: Milisecon
     let remaining = race_time.saturating_sub(button_held_for_ms);
 
     // 1 ms held = 1 mm
-    let speed = remaining * button_held_for_ms;
-    speed    
+    
+    remaining * button_held_for_ms    
 }
 
 fn victories_for_each_record(race: Race) -> Vec<Milimeter> {
@@ -65,7 +65,7 @@ pub fn day6() {
     
     println!("Hello {:?}", races);
     let victories: usize = races.iter().map(|r| {
-        let vs = victories_for_each_record(r.clone());
+        let vs = victories_for_each_record(*r);
         vs.len()
     }).inspect(|v| println!("{}", v)).product();
 

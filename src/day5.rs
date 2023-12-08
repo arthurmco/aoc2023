@@ -47,7 +47,7 @@ impl AlmanacRange {
             })
             .collect();
 
-        if ranges_in_source.len() == 0 {
+        if ranges_in_source.is_empty() {
             vec![source]
         } else {
             vec![source]
@@ -150,46 +150,46 @@ impl SeedFile {
         let light = AlmanacRange::correspondences(&self.water_to_light, water);
         let temperature = AlmanacRange::correspondences(&self.light_to_temperature, light);
         let humidity = AlmanacRange::correspondences(&self.temperature_to_humidity, temperature);
-        let location = AlmanacRange::correspondences(&self.humidity_to_location, humidity);
+        
 
         /* eprintln!(
             "soil {} fert {} water {} light {} temp {} humidity {}",
             soil, fertilizer, water, light, temperature, humidity
         ); */
 
-        location
+        AlmanacRange::correspondences(&self.humidity_to_location, humidity)
     }
 
     fn seed_to_location_ranges(&self, seed: SeedRange) -> Vec<SeedRange> {
         let soil = AlmanacRange::correspondence_ranges(&self.seed_to_soil, seed);
         let fertilizer: Vec<SeedRange> = soil
             .iter()
-            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.soil_to_fertilizer, s.clone()))
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.soil_to_fertilizer, *s))
             .collect();
         let water: Vec<SeedRange> = fertilizer
             .iter()
-            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.fertilizer_to_water, s.clone()))
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.fertilizer_to_water, *s))
             .collect();
         let light: Vec<SeedRange> = water
             .iter()
-            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.water_to_light, s.clone()))
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.water_to_light, *s))
             .collect();
         let temperature: Vec<SeedRange> = light
             .iter()
             .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.light_to_temperature, s.clone())
+                AlmanacRange::correspondence_ranges(&self.light_to_temperature, *s)
             })
             .collect();
         let humidity: Vec<SeedRange> = temperature
             .iter()
             .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.temperature_to_humidity, s.clone())
+                AlmanacRange::correspondence_ranges(&self.temperature_to_humidity, *s)
             })
             .collect();
         let location: Vec<SeedRange> = humidity
             .iter()
             .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.humidity_to_location, s.clone())
+                AlmanacRange::correspondence_ranges(&self.humidity_to_location, *s)
             })
             .collect();
 
@@ -240,7 +240,7 @@ impl SeedFile {
     }
 
     fn split_initial_seeds(line: &str) -> Vec<(usize, usize)> {
-        split_numbers_by_space(&line)
+        split_numbers_by_space(line)
             .chunks(2)
             .map(|v| (v[0], v[1]))
             .collect()
