@@ -63,12 +63,12 @@ impl OASISSequence {
     fn generate_single_derivative(input: &Vec<isize>) -> Vec<isize> {
         input.windows(2).map(|w| w[1] - w[0]).collect()
     }
-    
-    fn generate_derivative_iter(&self) -> OASISSequenceIter {
+
+    fn calculate_derivatives(start: &Vec<isize>) -> Vec<Vec<isize>> {
         let mut derivatives: Vec<Vec<isize>> = Vec::new();
 
         loop {
-            let last_sequence = derivatives.last().unwrap_or(&self.start);
+            let last_sequence = derivatives.last().unwrap_or(start);
             derivatives.push(OASISSequence::generate_single_derivative(&last_sequence));
 
             assert!(derivatives.last().is_some());
@@ -76,14 +76,53 @@ impl OASISSequence {
                 break;
             }
         }
-        
+
+        derivatives
+    }
+
+    fn calculate_previous_derivatives(start: &Vec<isize>) -> Vec<Vec<isize>> {
+        let mut derivatives: Vec<Vec<isize>> = Vec::new();
+
+        loop {
+            let last_sequence = derivatives.last().unwrap_or(start);
+            derivatives.push(OASISSequence::generate_single_derivative(&last_sequence));
+
+            if *derivatives.last().unwrap().first().unwrap_or(&0) == 0 {
+                break;
+            }
+        }
+
+        derivatives
+    }
+    
+    fn generate_derivative_iter(&self) -> OASISSequenceIter {
+        let derivatives = OASISSequence::calculate_derivatives(&self.start);
         OASISSequenceIter::new(self.start.last().cloned().unwrap() as usize, derivatives)
+    }
+
+    fn generate_derivative_previous_iter(&self) -> OASISSequenceIter {
+        let mut start_rev = self.start.clone();
+        start_rev.reverse();
+        
+        let derivatives = OASISSequence::calculate_previous_derivatives(&start_rev); 
+        OASISSequenceIter::new(self.start.first().cloned().unwrap() as usize, derivatives)
     }
 }
 
 
 
 pub fn day9() {
+    //let game_file = read_file_as_text("./inputs/day9test.txt").lines();
+    let game_file = read_file_as_text("./inputs/day9real.txt").lines();
+    let sequences = game_file.map(|s| OASISSequence::new(split_numbers_by_space(&s.unwrap()).into_iter())).inspect(|s| println!("s {:?}", s));
+
+    let derivatives = sequences.map(|s| (s.generate_derivative_previous_iter())).map(|mut d| d.next().unwrap());
+    let next_sequences = derivatives.inspect(|v| eprintln!("n {:?}", v)).collect::<Vec<isize>>();
+           
+    println!("{}", next_sequences.into_iter().sum::<isize>());
+}
+
+pub fn day9t1() {
     //let game_file = read_file_as_text("./inputs/day9test.txt").lines();
     let game_file = read_file_as_text("./inputs/day9real.txt").lines();
     let sequences = game_file.map(|s| OASISSequence::new(split_numbers_by_space(&s.unwrap()).into_iter())).inspect(|s| println!("s {:?}", s));
