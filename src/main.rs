@@ -7,6 +7,7 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day10;
 pub mod util;
 
 use day1::day1;
@@ -18,6 +19,7 @@ use day6::day6;
 use day7::day7;
 use day8::{day8, day8view};
 use day9::day9;
+use day10::day10;
 
 fn main() {
     let day = std::env::args().nth(1).expect("You need to pass the day (in the form of day<X>)");
@@ -33,6 +35,7 @@ fn main() {
         "day8" => day8(),
         "day8view" => day8view(),
         "day9" => day9(),
+        "day10" => day10(),
         _ => panic!("Day not found!")
     }   
 }
