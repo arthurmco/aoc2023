@@ -1,8 +1,8 @@
+use num::Num;
 use std::fs::File;
 use std::io::BufReader;
 use std::ops::Deref;
 use std::str::FromStr;
-use num::Num;
 
 pub fn read_file_as_text(path: &str) -> BufReader<File> {
     let f = File::open(path).unwrap();
@@ -38,6 +38,6 @@ pub fn generate_adjacencies<T, T2: Deref<Target = [T]>>(
 pub fn split_numbers_by_space<T: Num + FromStr>(val: &str) -> Vec<T> {
     val.trim()
         .split(' ')
-        .filter_map(|s| s.parse::<T>().ok() )
+        .filter_map(|s| s.parse::<T>().ok())
         .collect()
 }

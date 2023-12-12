@@ -43,7 +43,8 @@ impl AlmanacRange {
                 let (sstart, slen) = source;
                 let range_end = r.source_start + r.range_length;
 
-                (r.source_start.saturating_sub(r.range_length)) <= sstart && (sstart + slen) <= (range_end)
+                (r.source_start.saturating_sub(r.range_length)) <= sstart
+                    && (sstart + slen) <= (range_end)
             })
             .collect();
 
@@ -52,61 +53,61 @@ impl AlmanacRange {
         } else {
             vec![source]
             /*ranges_in_source.sort_by(|a, b| a.source_start.cmp(&b.source_start));
-            //println!("\n\n\n\n\n\n\nris {:?} {:?}", ranges_in_source, source);
-            
-            let mut ret = vec![];
-            let mut current = source.0;
-            let end = current + source.1;
+              //println!("\n\n\n\n\n\n\nris {:?} {:?}", ranges_in_source, source);
 
-            eprintln!("-");
-            for range in ranges_in_source {
-                if current < range.source_start {
-                    let len = (range.source_start - current).min(end-current);
-                    ret.push((current, len));
-                    current += len;
-                }                
+              let mut ret = vec![];
+              let mut current = source.0;
+              let end = current + source.1;
 
-                if current >= end {
-                    //eprintln!("{} ret {:?}", current, ret);
-                    break;
-                }                         
+              eprintln!("-");
+              for range in ranges_in_source {
+                  if current < range.source_start {
+                      let len = (range.source_start - current).min(end-current);
+                      ret.push((current, len));
+                      current += len;
+                  }
 
-                let from_start = range.source_start;
-                let to_start = range.destination_start;
-                let from_end = from_start + range.range_length;
-                let offset = current - range.source_start;
-                let real_start = from_start + offset;               
+                  if current >= end {
+                      //eprintln!("{} ret {:?}", current, ret);
+                      break;
+                  }
 
-                //eprintln!("{} - {}", end, current);
-                let remaining_len = end - current;
+                  let from_start = range.source_start;
+                  let to_start = range.destination_start;
+                  let from_end = from_start + range.range_length;
+                  let offset = current - range.source_start;
+                  let real_start = from_start + offset;
 
-                let length = (remaining_len).min(from_end - real_start);
-                //println!("{} = min({}, {} - {}) {}", length, remaining_len,
-                //from_end, real_start, from_end-real_start);
-                
-                //                println!("fe {} {:?} {}, {}, {}", length, ((to_start+offset, length)), end, current,
-                //         end.saturating_sub(current));
+                  //eprintln!("{} - {}", end, current);
+                  let remaining_len = end - current;
 
-                
-                //eprintln!("r {:?}", range);
-                ret.push((to_start + offset, length));
-                //eprintln!("{} ret {:?}", current, ret);
+                  let length = (remaining_len).min(from_end - real_start);
+                  //println!("{} = min({}, {} - {}) {}", length, remaining_len,
+                  //from_end, real_start, from_end-real_start);
 
-                current += length;
+                  //                println!("fe {} {:?} {}, {}, {}", length, ((to_start+offset, length)), end, current,
+                  //         end.saturating_sub(current));
 
-                if current >= end {
-                    break;
-                }                               
-            }
-            
-            assert!(current <= end);
-            if current < end {
-                ret.push((current, end - current));
-            } 
-            
-            ret
-          */  
-        } 
+
+                  //eprintln!("r {:?}", range);
+                  ret.push((to_start + offset, length));
+                  //eprintln!("{} ret {:?}", current, ret);
+
+                  current += length;
+
+                  if current >= end {
+                      break;
+                  }
+              }
+
+              assert!(current <= end);
+              if current < end {
+                  ret.push((current, end - current));
+              }
+
+              ret
+            */
+        }
     }
 }
 
@@ -150,7 +151,6 @@ impl SeedFile {
         let light = AlmanacRange::correspondences(&self.water_to_light, water);
         let temperature = AlmanacRange::correspondences(&self.light_to_temperature, light);
         let humidity = AlmanacRange::correspondences(&self.temperature_to_humidity, temperature);
-        
 
         /* eprintln!(
             "soil {} fert {} water {} light {} temp {} humidity {}",
@@ -176,21 +176,15 @@ impl SeedFile {
             .collect();
         let temperature: Vec<SeedRange> = light
             .iter()
-            .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.light_to_temperature, *s)
-            })
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.light_to_temperature, *s))
             .collect();
         let humidity: Vec<SeedRange> = temperature
             .iter()
-            .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.temperature_to_humidity, *s)
-            })
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.temperature_to_humidity, *s))
             .collect();
         let location: Vec<SeedRange> = humidity
             .iter()
-            .flat_map(|s| {
-                AlmanacRange::correspondence_ranges(&self.humidity_to_location, *s)
-            })
+            .flat_map(|s| AlmanacRange::correspondence_ranges(&self.humidity_to_location, *s))
             .collect();
 
         eprintln!(
@@ -355,7 +349,7 @@ pub fn day5() {
     let game_file = read_file_as_text("./inputs/day5real.txt").lines();
     //let game_file = read_file_as_text("./inputs/day5test.txt").lines();
     let seed_file = SeedFile::from_lines(game_file.map(|l| l.unwrap()));
-    
+
     //let ranges = vec![AlmanacRange::from_line("50 98 2"), AlmanacRange::from_line("52 50 48")];
     println!("Hello {:?} ", seed_file);
     let locations = seed_file
@@ -368,6 +362,4 @@ pub fn day5() {
         .unwrap();
 
     println!("\n{}", locations)
-
 }
-

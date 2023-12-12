@@ -4,15 +4,12 @@ use std::cmp;
 use std::default::Default;
 use std::io::prelude::*;
 
-#[derive(Debug, Clone)]
-#[derive(Default)]
+#[derive(Debug, Clone, Default)]
 struct CubeSet {
     pub blues: usize,
     pub greens: usize,
     pub reds: usize,
 }
-
-
 
 impl CubeSet {
     pub fn power(&self) -> usize {
@@ -34,28 +31,27 @@ fn parse_each_set(line: &str) -> CubeSet {
     // 3 X, 4 Y
     let regex = Regex::new(r"(?m)\s*(\d*)\s*([a-z]*)").unwrap();
 
-    line.split(',')
-        .fold(CubeSet::default(), |acc, cube_line| {
-            let caps = regex.captures(cube_line).unwrap();
-            let count = caps.get(1).unwrap().as_str().parse::<usize>().unwrap();
-            let color = caps.get(2).unwrap().as_str();
+    line.split(',').fold(CubeSet::default(), |acc, cube_line| {
+        let caps = regex.captures(cube_line).unwrap();
+        let count = caps.get(1).unwrap().as_str().parse::<usize>().unwrap();
+        let color = caps.get(2).unwrap().as_str();
 
-            match color {
-                "blue" => CubeSet {
-                    blues: acc.blues + count,
-                    ..acc
-                },
-                "green" => CubeSet {
-                    greens: acc.greens + count,
-                    ..acc
-                },
-                "red" => CubeSet {
-                    reds: acc.reds + count,
-                    ..acc
-                },
-                _ => panic!("Color unsupported!"),
-            }
-        })
+        match color {
+            "blue" => CubeSet {
+                blues: acc.blues + count,
+                ..acc
+            },
+            "green" => CubeSet {
+                greens: acc.greens + count,
+                ..acc
+            },
+            "red" => CubeSet {
+                reds: acc.reds + count,
+                ..acc
+            },
+            _ => panic!("Color unsupported!"),
+        }
+    })
 }
 
 fn parse_round(line: &str) -> Vec<CubeSet> {
@@ -99,9 +95,7 @@ pub fn day2() {
     //let game_file = read_file_as_text("./inputs/day2test1.txt");
     let game_file = read_file_as_text("./inputs/day2real.txt");
 
-    let parsed_game = game_file
-        .lines()
-        .map(|v| parse_line(&v.unwrap()));
+    let parsed_game = game_file.lines().map(|v| parse_line(&v.unwrap()));
     let id_sum: usize = parsed_game
         .map(|(_game, sets)| {
             let minimum_set = sets

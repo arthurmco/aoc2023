@@ -1,4 +1,4 @@
-use crate::util::{read_file_as_text, generate_adjacencies};
+use crate::util::{generate_adjacencies, read_file_as_text};
 use regex::Regex;
 use std::io::prelude::*;
 
@@ -111,15 +111,9 @@ impl Schematic {
             .map(|(gear, nums)| (*gear, nums[0], nums[1]))
             .collect()
     }
-    
-    fn retrieve_gear_ratio_sum(
-        &self,
-        gears: Vec<(GearPosition, u32, u32)>
-    ) -> u64 {
-        gears
-            .iter()
-            .map(|(_, g1, g2)| (g1*g2) as u64)
-            .sum()
+
+    fn retrieve_gear_ratio_sum(&self, gears: Vec<(GearPosition, u32, u32)>) -> u64 {
+        gears.iter().map(|(_, g1, g2)| (g1 * g2) as u64).sum()
     }
 }
 
@@ -127,8 +121,7 @@ pub fn _day3t1() {
     let game_file = read_file_as_text("./inputs/day3real.txt");
     //let game_file = read_file_as_text("./inputs/day3test.txt");
 
-    let schematic =
-        Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
+    let schematic = Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
 
     let numbers = schematic.retrieve_numbers_and_positions();
     //println!("Hello, {:?}", schematic);
@@ -150,8 +143,7 @@ pub fn day3() {
     let game_file = read_file_as_text("./inputs/day3real.txt");
     //let game_file = read_file_as_text("./inputs/day3test.txt");
 
-    let schematic =
-        Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
+    let schematic = Schematic::from_line_iter(game_file.lines().filter_map(|s| s.ok()));
 
     let numbers = schematic.retrieve_numbers_and_positions();
     let gears = schematic.retrieve_possible_gears_position();
@@ -161,7 +153,6 @@ pub fn day3() {
 
     let sum = schematic.retrieve_gear_ratio_sum(gears);
     println!("{}", sum);
-        
 
     //println!("{}", part_numbers.into_iter().map(|v| v as u64).sum::<u64>())
 }

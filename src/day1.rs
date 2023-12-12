@@ -12,8 +12,14 @@ fn _fix_incorrect_line(line: &str) -> u64 {
 
 pub fn _day1t1() {
     let coord_file = read_file_as_text("./inputs/day1real.txt");
-    
-    println!("{}", coord_file.lines().map(|l| _fix_incorrect_line(&l.unwrap())).sum::<u64>())
+
+    println!(
+        "{}",
+        coord_file
+            .lines()
+            .map(|l| _fix_incorrect_line(&l.unwrap()))
+            .sum::<u64>()
+    )
 }
 
 fn try_convert_into_number(line_piece: &str) -> Option<(String, usize)> {
@@ -21,7 +27,7 @@ fn try_convert_into_number(line_piece: &str) -> Option<(String, usize)> {
     // This is mostly for saving time...
     //
     // The objective is to parse 'eightwothree' as 8wo3 and not eigh23.
-    //  
+    //
     [
         (3, "three"),
         (7, "seven"),
@@ -32,9 +38,10 @@ fn try_convert_into_number(line_piece: &str) -> Option<(String, usize)> {
         (1, "one"),
         (2, "two"),
         (6, "six"),
-    ].into_iter().find(
-        |(_num, name)| line_piece.starts_with(name)
-    ).map(|(num, name)| (num.to_string(), name.len()))
+    ]
+    .into_iter()
+    .find(|(_num, name)| line_piece.starts_with(name))
+    .map(|(num, name)| (num.to_string(), name.len()))
 }
 
 fn transform_line(line: &str) -> String {
@@ -47,7 +54,7 @@ fn transform_line(line: &str) -> String {
         let skip = match try_convert_into_number(&linem[index..]) {
             Some((num, skip)) => {
                 resline += &num;
-                skip-1 // not really correct, but good enough
+                skip - 1 // not really correct, but good enough
             }
             None => {
                 resline += &String::from(linem.chars().nth(index).unwrap());
@@ -57,10 +64,9 @@ fn transform_line(line: &str) -> String {
 
         index += skip
     }
-       
+
     resline
 }
-
 
 fn fix_incorrect_line2(line: &str) -> u64 {
     let tline = transform_line(line);
@@ -68,13 +74,18 @@ fn fix_incorrect_line2(line: &str) -> u64 {
     let last = tline.chars().rfind(|c| c.is_ascii_digit()).unwrap();
 
     // println!("{}{}", first, last);
-    
+
     format!("{}{}", first, last).parse::<u64>().unwrap()
 }
 
-
 pub fn day1() {
     let coord_file = read_file_as_text("./inputs/day1real.txt");
-    
-    println!("{}", coord_file.lines().map(|l| fix_incorrect_line2(&l.unwrap())).sum::<u64>())
+
+    println!(
+        "{}",
+        coord_file
+            .lines()
+            .map(|l| fix_incorrect_line2(&l.unwrap()))
+            .sum::<u64>()
+    )
 }
