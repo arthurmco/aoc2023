@@ -41,3 +41,10 @@ pub fn split_numbers_by_space<T: Num + FromStr>(val: &str) -> Vec<T> {
         .filter_map(|s| s.parse::<T>().ok())
         .collect()
 }
+
+pub fn split_numbers_by_comma<T: Num + FromStr>(val: &str) -> Vec<T> {
+    val.trim()
+        .split(',')
+        .filter_map(|s| s.parse::<T>().ok())
+        .collect()
+}

@@ -1,6 +1,7 @@
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -14,6 +15,7 @@ pub mod util;
 use day1::day1;
 use day10::day10;
 use day11::day11;
+use day12::day12;
 use day2::day2;
 use day3::day3;
 use day4::day4;
@@ -41,6 +43,7 @@ fn main() {
         "day9" => day9(),
         "day10" => day10(),
         "day11" => day11(),
+        "day12" => day12(),
         _ => panic!("Day not found!"),
     }
 }
